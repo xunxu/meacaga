@@ -39,10 +39,9 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
     $json = array("status" => 0, "msg" => "Request method not accepted");
 }
 
-@mysql_close($conn);
 
 /* Output header */
-	header('Content-type: application/json');
-	echo json_encode($json);
+header('Content-type: application/json');
+echo json_encode($json);
 
 ?>
