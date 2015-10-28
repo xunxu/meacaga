@@ -20,101 +20,46 @@ class db_handler {
         $this->conn = $db->connect();
     }
 
+    /* ------------- `places` table method ------------------ */
+
     /**
-     * Creating new user
-     * @param String $name User full name
-     * @param String $email User login email id
-     * @param String $password User login password
+     * Add new place
+     * @param $name
+     * @param $description
+     * @param $address
+     * @param $lat
+     * @param $lng
+     * @param $author
+     * @param $email
+     * @param $date
      */
-    public function createScore($placeId) {
+    public function addPlace($name, $description, $address, $lat, $lng, $author, $email, $date) {
         $response = array();
 
         // insert query
-        $stmt = $this->conn->prepare("INSERT INTO score(PlaceId, Paper, Size, WaitTime, Cleanliness, Smell) values($placeId, )");
-
+        $stmt = $this->conn->prepare("INSERT INTO places(name, description, address, lat, lng, author, email, date) values(?,?,?,?,?,?,?,?)");
+        $stmt->bind_param("ssssssss", $name, $description, $address, $lat, $lng, $author, $email, $date);
         $result = $stmt->execute();
-
         $stmt->close();
+        return $result;
     }
 
-    /* ------------- `users` table method ------------------ */
 
     /**
-     * Fetching user by email
+     * Get place by place ID
      * @param String $placeId place ID
-     * @return null
+     * @return place
      */
-    public function getScore($placeId) {
-        $stmt = $this->conn->prepare("SELECT Paper FROM score WHERE ScoreId = ?");
+    public function getPlaceById($placeId) {
+        $stmt = $this->conn->prepare("SELECT name, description, address, lat, lng, author, email, date FROM places WHERE place_id = ?");
         $stmt->bind_param("s", $placeId);
         if ($stmt->execute()) {
-            $score = $stmt->get_result()->fetch_assoc();
+            $place = $stmt->get_result()->fetch_assoc();
             $stmt->close();
-            return $score;
+            return $place;
         } else {
             return NULL;
         }
-    }
-
-
-    /* ------------- `tasks` table method ------------------ */
-
-    /**
-     * Creating new task
-     * @param String $user_id user id to whom task belongs to
-     * @param String $task task text
-     */
-    public function createTask($user_id, $task) {
-        $stmt = $this->conn->prepare("INSERT INTO tasks(task) VALUES(?)");
-        $stmt->bind_param("s", $task);
-        $result = $stmt->execute();
-        $stmt->close();
-
-        if ($result) {
-            // task row created
-            // now assign the task to user
-            $new_task_id = $this->conn->insert_id;
-            $res = $this->createUserTask($user_id, $new_task_id);
-            if ($res) {
-                // task created successfully
-                return $new_task_id;
-            } else {
-                // task failed to create
-                return NULL;
-            }
-        } else {
-            // task failed to create
-            return NULL;
-        }
-    }
-
-    /**
-     * Fetching single task
-     * @param String $task_id id of the task
-     */
-    public function getTask($task_id, $user_id) {
-        $stmt = $this->conn->prepare("SELECT t.id, t.task, t.status, t.created_at from tasks t, user_tasks ut WHERE t.id = ? AND ut.task_id = t.id AND ut.user_id = ?");
-        $stmt->bind_param("ii", $task_id, $user_id);
-        if ($stmt->execute()) {
-            $task = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
-            return $task;
-        } else {
-            return NULL;
-        }
-    }
-
-    /**
-     * Fetching all user tasks
-     * @param String $user_id id of the user
-     */
-    public function getAllUserTasks($user_id) {
-        $stmt = $this->conn->prepare("SELECT t.* FROM tasks t, user_tasks ut WHERE t.id = ut.task_id AND ut.user_id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $tasks = $stmt->get_result();
-        $stmt->close();
-        return $tasks;
     }
 
 }

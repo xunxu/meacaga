@@ -33,11 +33,11 @@ USE `meacaga`;
 
 CREATE TABLE `places` (
   `place_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) NOT NULL DEFAULT ' ',
+  `description` varchar(1000) NOT NULL DEFAULT ' ',
   `address` varchar(200) NOT NULL DEFAULT ' ',
   `lat` float NOT NULL,
   `lng` float NOT NULL,
-  `name` varchar(200) NOT NULL DEFAULT ' ',
-  `description` varchar(1000) NOT NULL DEFAULT ' ',
   `author` varchar(200) NOT NULL DEFAULT ' ',
   `email` varchar(200) NOT NULL DEFAULT ' ',
   `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -110,9 +110,9 @@ USE `phpmyadmin`;
 -- Volcado de datos para las tablas
 --
 
-INSERT INTO `meacaga`.`places` (`place_id`, `address`, `lat`, `lng`, `name`, `description`, `author`, `email`, `date`) VALUES
-(1, 'Calle Rodillo, 16, 37001 Salamanca, Salamanca, España', 40.9624, -5.65992, 'El gabri', 'baño', 'jesus', 'jeuss@jeusus.es', '2015-06-25 20:51:43'),
-(2, 'Calle Padilleros, 17, 37002 Salamanca, Salamanca, España', 40.9684, -5.66221, '', '', ' ', ' ', '2015-06-26 01:36:56');
+INSERT INTO `meacaga`.`places` (`place_id`, `name`, `description`, `address`, `lat`, `lng`, `author`, `email`, `date`) VALUES
+(1, 'El gabri', 'baño', 'Calle Rodillo, 16, 37001 Salamanca, Salamanca, España', 40.9624, -5.65992, 'jesus', 'jeuss@jeusus.es', '2015-06-25 20:51:43'),
+(2, '', '', 'Calle Padilleros, 17, 37002 Salamanca, Salamanca, España', 40.9684, -5.66221, ' ', ' ', '2015-06-26 01:36:56');
 
 
 INSERT INTO `meacaga`.`comments` (`comment_id`, `place_id`, `comment`, `date`) VALUES
