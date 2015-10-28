@@ -1,11 +1,13 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: Jesus
- * Date: 27/10/2015
- * Time: 13:52
+ * Date: 28/10/2015
+ * Time: 13:16
  */
-class Score {
+class class_score
+{
     var $scoreId, $placeId, $paper, $size, $waitTime, $cleanliness, $smell;
 
     function __construct($scoreId, $placeId, $paper, $size, $waitTime, $cleanliness, $smell){
@@ -17,6 +19,8 @@ class Score {
         $this->cleanliness=$cleanliness;
         $this->smell=$smell;
     }
+
+
 }
 
 ?>

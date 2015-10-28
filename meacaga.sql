@@ -31,22 +31,17 @@ USE `meacaga`;
 -- Estructura de tabla para la tabla `Places`
 --
 
-CREATE TABLE `Places` (
-  `PlaceId` int(11) NOT NULL AUTO_INCREMENT,
-  `Address` varchar(200) NOT NULL DEFAULT ' ',
-  `Lat` float NOT NULL,
-  `Lng` float NOT NULL,
-  `PlaceName` varchar(200) NOT NULL DEFAULT ' ',
-  `Description` varchar(1000) NOT NULL DEFAULT ' ',
-  `Paper` int(11) NOT NULL DEFAULT '1',
-  `Size` int(11) NOT NULL DEFAULT '2',
-  `WaitTime` int(11) NOT NULL DEFAULT '2',
-  `Cleanliness` int(11) NOT NULL DEFAULT '2',
-  `Smell` int(11) NOT NULL DEFAULT '2',
-  `Author` varchar(200) NOT NULL DEFAULT ' ',
-  `Email` varchar(200) NOT NULL DEFAULT ' ',
-  `Date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`PlaceId`)
+CREATE TABLE `places` (
+  `place_id` int(11) NOT NULL AUTO_INCREMENT,
+  `address` varchar(200) NOT NULL DEFAULT ' ',
+  `lat` float NOT NULL,
+  `lng` float NOT NULL,
+  `name` varchar(200) NOT NULL DEFAULT ' ',
+  `description` varchar(1000) NOT NULL DEFAULT ' ',
+  `author` varchar(200) NOT NULL DEFAULT ' ',
+  `email` varchar(200) NOT NULL DEFAULT ' ',
+  `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`place_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -57,14 +52,34 @@ CREATE TABLE `Places` (
 -- Estructura de tabla para la tabla `Comments`
 --
 
-CREATE TABLE `Comments` (
-  `CommentId` int(11) NOT NULL AUTO_INCREMENT,
-  `PlaceId` int(11) NOT NULL,
-  `Comment` varchar(1000) NOT NULL DEFAULT ' ',
-  `Date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`CommentId`),
-  INDEX (`PlaceId`),
-  CONSTRAINT FOREIGN KEY (`PlaceId`) REFERENCES `Places` (`PlaceId`) ON DELETE CASCADE ON UPDATE CASCADE
+CREATE TABLE `comments` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `place_id` int(11) NOT NULL,
+  `comment` varchar(1000) NOT NULL DEFAULT ' ',
+  `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`comment_id`),
+  INDEX (`place_id`),
+  CONSTRAINT FOREIGN KEY (`place_id`) REFERENCES `places` (`place_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `Score`
+--
+
+CREATE TABLE `scores` (
+  `score_id` int(11) NOT NULL AUTO_INCREMENT,
+  `place_id` int(11) NOT NULL,
+  `paper` int(11) NOT NULL,
+  `size` int(11) NOT NULL,
+  `wait_time` int(11) NOT NULL,
+  `cleanliness` int(11) NOT NULL,
+  `smell` int(11) NOT NULL,
+  PRIMARY KEY (`score_id`),
+  INDEX (`place_id`),
+  CONSTRAINT FOREIGN KEY (`place_id`) REFERENCES `places` (`place_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -74,35 +89,15 @@ CREATE TABLE `Comments` (
 -- Estructura de tabla para la tabla `Photos`
 --
 
-CREATE TABLE `Photos` (
-  `PhotoId` int(11) NOT NULL AUTO_INCREMENT,
-  `PlaceId` int(11) NOT NULL,
-  `Path` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`PhotoId`),
-  INDEX (`PlaceId`),
-  CONSTRAINT FOREIGN KEY (`PlaceId`) REFERENCES `Places` (`PlaceId`) ON DELETE CASCADE ON UPDATE CASCADE
+CREATE TABLE `photos` (
+  `photo_id` int(11) NOT NULL AUTO_INCREMENT,
+  `place_id` int(11) NOT NULL,
+  `path` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`photo_id`),
+  INDEX (`place_id`),
+  CONSTRAINT FOREIGN KEY (`place_id`) REFERENCES `places` (`place_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `Score`
---
-
-CREATE TABLE `Score` (
-  `ScoreId` int(11) NOT NULL AUTO_INCREMENT,
-  `PlaceId` int(11) NOT NULL,
-  `Paper` int(11) NOT NULL,
-  `Size` int(11) NOT NULL,
-  `WaitTime` int(11) NOT NULL,
-  `Cleanliness` int(11) NOT NULL,
-  `Smell` int(11) NOT NULL,
-  PRIMARY KEY (`ScoreId`),
-  INDEX (`PlaceId`),
-  CONSTRAINT FOREIGN KEY (`PlaceId`) REFERENCES `Places` (`PlaceId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 --
@@ -115,12 +110,12 @@ USE `phpmyadmin`;
 -- Volcado de datos para las tablas
 --
 
-INSERT INTO `meacaga`.`Places` (`PlaceId`, `Address`, `Lat`, `Lng`, `PlaceName`, `Description`, `Paper`, `Size`, `WaitTime`, `Cleanliness`, `Smell`, `Author`, `Email`, `Date`) VALUES
-(1, 'Calle Rodillo, 16, 37001 Salamanca, Salamanca, España', 40.9624, -5.65992, 'El gabri', 'baño', 1, 2, 2, 2, 2, 'jesus', 'jeuss@jeusus.es', '2015-06-25 20:51:43'),
-(2, 'Calle Padilleros, 17, 37002 Salamanca, Salamanca, España', 40.9684, -5.66221, '', '', 1, 2, 2, 2, 2, ' ', ' ', '2015-06-26 01:36:56');
+INSERT INTO `meacaga`.`places` (`place_id`, `address`, `lat`, `lng`, `name`, `description`, `author`, `email`, `date`) VALUES
+(1, 'Calle Rodillo, 16, 37001 Salamanca, Salamanca, España', 40.9624, -5.65992, 'El gabri', 'baño', 'jesus', 'jeuss@jeusus.es', '2015-06-25 20:51:43'),
+(2, 'Calle Padilleros, 17, 37002 Salamanca, Salamanca, España', 40.9684, -5.66221, '', '', ' ', ' ', '2015-06-26 01:36:56');
 
 
-INSERT INTO `meacaga`.`Comments` (`CommentId`, `PlaceId`, `Comment`, `Date`) VALUES
+INSERT INTO `meacaga`.`comments` (`comment_id`, `place_id`, `comment`, `date`) VALUES
 (1, 1, 'sdfsdf', '2015-06-26 09:24:39'),
 (2, 1, 'alksjd', '2015-06-26 09:24:39'),
 (3, 1, 'lkasd', '2015-06-26 10:01:20'),
@@ -128,7 +123,7 @@ INSERT INTO `meacaga`.`Comments` (`CommentId`, `PlaceId`, `Comment`, `Date`) VAL
 (5, 2, 'bbbbbbbb', '2015-06-26 10:06:57');
 
 
-INSERT INTO `meacaga`.`Score` (`ScoreId`, `PlaceId`, `Paper`, `Size`, `WaitTime`, `Cleanliness`, `Smell`) VALUES
+INSERT INTO `meacaga`.`scores` (`score_id`, `place_id`, `paper`, `size`, `wait_time`, `cleanliness`, `smell`) VALUES
 (1, 1, 3, 5, 2, 3, 5),
 (5, 2, 3, 5, 1, 1, 1),
 (6, 2, 3, 5, 1, 1, 1),
