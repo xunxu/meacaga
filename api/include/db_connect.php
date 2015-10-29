@@ -20,6 +20,7 @@ class db_connect {
     function connect() {
         include_once dirname(__FILE__) . './db_config.php';
 
+        //mysqli_report(MYSQLI_REPORT_ALL);
         // Connecting to mysql database
         $this->conn = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME);
 
