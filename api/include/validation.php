@@ -58,7 +58,7 @@ function validateEmail($email) {
 function validateGeolocation($lat, $lng) {
     $app = \Slim\Slim::getInstance();
     if(is_numeric($lat) && is_numeric($lng)){
-        if($lat<-90 || $lat>90 || $lng<-180 ||$lng>180){
+        if($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180){
             $response["error"] = true;
             $response["message"] = 'The latitude must be a number between -90 and 90 and the longitude between -180 and 180';
             echoResponse(400, $response);
@@ -68,6 +68,28 @@ function validateGeolocation($lat, $lng) {
     else{
         $response["error"] = true;
         $response["message"] = 'Latitude and Longitude must be numeric values';
+        echoResponse(400, $response);
+        $app->stop();
+    }
+}
+
+
+/**
+ * Validating score value
+ */
+function validateScore($score) {
+    $app = \Slim\Slim::getInstance();
+    if(is_numeric($score)){
+        if($score < 0 || $score > 5){
+            $response["error"] = true;
+            $response["message"] = 'The score must be a number between 0 and 5';
+            echoResponse(400, $response);
+            $app->stop();
+        }
+    }
+    else{
+        $response["error"] = true;
+        $response["message"] = 'Score must be numeric value';
         echoResponse(400, $response);
         $app->stop();
     }

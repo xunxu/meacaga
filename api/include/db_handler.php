@@ -14,7 +14,7 @@ class db_handler {
     private $conn;
 
     function __construct() {
-        require_once dirname(__FILE__) . './db_connect.php';
+        require_once dirname(__FILE__) . '/db_connect.php';
         // opening db connection
         $db = new db_connect();
         $this->conn = $db->connect();
@@ -47,7 +47,7 @@ class db_handler {
 
     /**
      * Get place by place ID
-     * @param String $placeId place ID
+     * @param String $place_id place ID
      * @return place
      */
     public function getPlaceById($place_id) {
@@ -62,9 +62,32 @@ class db_handler {
         }
     }
 
+    /* ------------- `scores` table method ------------------ */
+
+    /**
+     * Add new score
+     * @param $place_id
+     * @param $paper
+     * @param $size
+     * @param $wait_time
+     * @param $cleanliness
+     * @param $smell
+     */
+    public function addScore($place_id, $paper, $size, $wait_time, $cleanliness, $smell) {
+        // insert query
+        $stmt = $this->conn->prepare("INSERT INTO scores(place_id, paper, size, wait_time, cleanliness, smell) values(?,?,?,?,?,?)");
+        $stmt->bind_param("ssssss", $place_id, $paper, $size, $wait_time, $cleanliness, $smell);
+        $result = $stmt->execute();
+        if($result){
+            $result = $stmt->insert_id;
+        }
+        $stmt->close();
+        return $result;
+    }
+
     /**
      * Get score by place ID
-     * @param String $placeId place ID
+     * @param String $place_id place ID
      * @return place
      */
     public function getScoreByPlaceId($place_id) {
@@ -106,6 +129,64 @@ class db_handler {
             return NULL;
         }
     }
+
+    /* ------------- `comments` table method ------------------ */
+
+    /**
+     * Get comments by place ID
+     * @param String $place_id place ID
+     * @return place
+     */
+    public function getCommentsByPlaceId($place_id) {
+        $comment = null; $date = null;
+
+        $stmt = $this->conn->prepare("SELECT comment, date FROM comments WHERE place_id = ?");
+        $stmt->bind_param("s", $place_id);
+        if($stmt->execute()){
+            $stmt->bind_result($comment, $date);
+
+            $result = array();
+            $num_comments = 0;
+            while ($stmt->fetch()) {
+                $result[] = array(
+                    'comment' => $comment,
+                    'date' => $date,
+                );
+                $num_comments++;
+            }
+
+            if(!$num_comments == 0){
+                $stmt->close();
+                return $result;
+            }
+            else{
+                $stmt->close();
+                return NULL;
+            }
+        }
+        else{
+            $stmt->close();
+            return NULL;
+        }
+    }
+
+    /**
+     * Add new comment
+     * @param $place_id
+     * @param $comment
+     */
+    public function addComment($place_id, $comment) {
+        // insert query
+        $stmt = $this->conn->prepare("INSERT INTO comments(place_id, comment) values(?,?)");
+        $stmt->bind_param("ss", $place_id, $comment);
+        $result = $stmt->execute();
+        if($result){
+            $result = $stmt->insert_id;
+        }
+        $stmt->close();
+        return $result;
+    }
+
 }
 
 ?>

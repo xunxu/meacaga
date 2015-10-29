@@ -8,7 +8,7 @@
 
 require_once '../include/db_handler.php';
 require_once '../include/validation.php';
-require '.././libs/Slim/Slim.php';
+require '../libs/Slim/Slim.php';
 
 \Slim\Slim::registerAutoloader();
 
@@ -20,12 +20,12 @@ $app = new \Slim\Slim();
  * method GET
  * Will return 404 if the place doesn't exist
  */
-$app->get('/place/:id', function($placeId) {
+$app->get('/place/:id', function($place_id) {
     $response = array();
     $db = new db_handler();
 
     // fetch task
-    $result = $db->getPlaceById($placeId);
+    $result = $db->getPlaceById($place_id);
 
     if ($result != NULL) {
         $response["error"] = false;
@@ -37,7 +37,7 @@ $app->get('/place/:id', function($placeId) {
         $response["author"] = $result["author"];
         $response["email"] = $result["email"];
         $response["date"] = $result["date"];
-        $result = $db->getScoreByPlaceId($placeId);
+        $result = $db->getScoreByPlaceId($place_id);
 
         if ($result != NULL) {
             $response["error"] = false;
@@ -101,19 +101,18 @@ $app->post('/place', function() use ($app) {
 });
 
 
-
 /**
- * Listing single place
+ * Listing score
  * url /place/:id
  * method GET
- * Will return 404 if the place doesn't exist
+ * Will return 404 if the score doesn't exist
  */
-$app->get('/score/:id', function($placeId) {
+$app->get('/score/:id', function($place_id) {
     $response = array();
     $db = new db_handler();
 
     // fetch task
-    $result = $db->getScoreByPlaceId($placeId);
+    $result = $db->getScoreByPlaceId($place_id);
 
     if ($result != NULL) {
         $response["error"] = false;
@@ -130,6 +129,108 @@ $app->get('/score/:id', function($placeId) {
     }
 });
 
+
+/**
+ * Score Registration
+ * url - /score
+ * method - POST
+ * params - place_id, paper, size, wait_time, cleanliness, smell
+ * Return: id of the new added score, or 400 if there are any error
+ */
+$app->post('/score', function() use ($app) {
+    verifyRequiredParams(array('place_id', 'paper', 'size', 'wait_time', 'cleanliness', 'smell'));
+
+    $response = array();
+
+    // reading post params
+    $place_id = $app->request->post('place_id');
+    $paper = $app->request->post('paper');
+    $size = $app->request->post('size');
+    $wait_time = $app->request->post('wait_time');
+    $cleanliness = $app->request->post('cleanliness');
+    $smell = $app->request->post('smell');
+
+    validateScore($paper);
+    validateScore($size);
+    validateScore($wait_time);
+    validateScore($cleanliness);
+    validateScore($smell);
+
+    $db = new db_handler();
+    $result = $db->addScore($place_id, $paper, $size, $wait_time, $cleanliness, $smell);
+
+    if(!$result){
+        $response["error"] = true;
+        $response["message"] = "Sorry, an error has occurred adding the score";
+        echoResponse(400, $response);
+    }
+    else{
+        $response["error"] = false;
+        $response["message"] = "Score added successfully";
+        $response["score_id"] = $result;
+        echoResponse(200, $response);
+    }
+
+});
+
+
+/**
+ * Listing comments
+ * url /comments/:id
+ * method GET
+ * Will return 404 if the are any comment
+ */
+$app->get('/comments/:id', function($place_id) {
+    $response = array();
+    $db = new db_handler();
+
+    // fetch task
+    $result = $db->getCommentsByPlaceId($place_id);
+
+    if ($result != NULL) {
+        $response["error"] = false;
+        $response["comments"] = $result;
+
+        echoResponse(200, $response);
+    } else {
+        $response["error"] = true;
+        $response["message"] = "The requested place doesn't have any comment";
+        echoResponse(404, $response);
+    }
+});
+
+/**
+ * Comment Registration
+ * url - /comment
+ * method - POST
+ * params - place_id, comment
+ * Return: id of the new added comment, or 400 if there are any error
+ */
+$app->post('/comment', function() use ($app) {
+    verifyRequiredParams(array('place_id', 'comment'));
+
+    $response = array();
+
+    // reading post params
+    $place_id = $app->request->post('place_id');
+    $comment = $app->request->post('comment');
+
+    $db = new db_handler();
+    $result = $db->addComment($place_id, $comment);
+
+    if(!$result){
+        $response["error"] = true;
+        $response["message"] = "Sorry, an error has occurred adding the comment";
+        echoResponse(400, $response);
+    }
+    else{
+        $response["error"] = false;
+        $response["message"] = "Comment added successfully";
+        $response["comment_id"] = $result;
+        echoResponse(200, $response);
+    }
+
+});
 
 
 $app->run();

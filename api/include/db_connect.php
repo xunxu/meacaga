@@ -18,7 +18,7 @@ class db_connect {
      * @return database connection handler
      */
     function connect() {
-        include_once dirname(__FILE__) . './db_config.php';
+        include_once dirname(__FILE__) . '/db_config.php';
 
         //mysqli_report(MYSQLI_REPORT_ALL);
         // Connecting to mysql database
