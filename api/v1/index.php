@@ -275,8 +275,8 @@ $app->get('/numberOfPlaces', function() {
         $response["error"] = false;
         $response["number_of_places"] = $result["COUNT(*)"];
         echoResponse(200, $response);
-    } else {
         $response["error"] = true;
+    } else {
         $response["message"] = "The are not any place";
         echoResponse(404, $response);
     }
@@ -330,6 +330,63 @@ $app->get('/topRatedPlaces', function() {
     } else {
         $response["error"] = true;
         $response["message"] = "There are not any place";
+        echoResponse(404, $response);
+    }
+});
+
+
+/**
+ * Photo upload
+ * url - /photo
+ * method - POST
+ * params - file
+ * Return: id of the new photo added, or 400 if there are any error
+ */
+$app->post('/photo', function() use ($app) {
+
+    $target_dir = "../../images/";
+    $imageFileType = pathinfo(basename($_FILES["fileToUpload"]["name"]),PATHINFO_EXTENSION);
+    $file_id =  md5(uniqid(rand(), true));
+    $target_file = $target_dir . $file_id . "." . $imageFileType;
+
+    $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
+    if($check !== false) {
+        // Check if file already exists
+        if (file_exists($target_file)) {
+            $response["error"] = true;
+            $response["message"] = "File already exists";
+            echoResponse(404, $response);
+        }
+        else{
+            // Check file size
+            if ($_FILES["fileToUpload"]["size"] > 500000) {
+                $response["error"] = true;
+                $response["message"] = "Your file is too large";
+                echoResponse(404, $response);
+            }
+            else{
+                // Allow certain file formats
+                if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif" ) {
+                    $response["error"] = true;
+                    $response["message"] = "Only JPG, JPEG, PNG & GIF files are allowed";
+                    echoResponse(404, $response);
+                }
+                else{
+                    if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+                        $response["error"] = false;
+                        $response["file"] = $file_id . "." . $imageFileType;
+                        echoResponse(404, $response);
+                    } else {
+                        $response["error"] = true;
+                        $response["message"] = "There was an error uploading your file";
+                        echoResponse(404, $response);
+                    }
+                }
+            }
+        }
+    } else {
+        $response["error"] = true;
+        $response["message"] = "File is not an image";
         echoResponse(404, $response);
     }
 });
