@@ -62,6 +62,143 @@ class db_handler {
         }
     }
 
+
+    /**
+     * Get last added places
+     * @return place list
+     */
+    public function getLastAddedPlaces() {
+        $place_id = null; $name = null;
+
+        $stmt = $this->conn->prepare("SELECT place_id, name FROM places ORDER BY date DESC LIMIT 5");
+        if($stmt->execute()){
+            $stmt->bind_result($place_id, $name);
+
+            $result = array();
+            $num_places = 0;
+            while ($stmt->fetch()) {
+                $result[] = array(
+                    'place_id' => $place_id,
+                    'name' => $name,
+                );
+                $num_places++;
+            }
+
+            if(!$num_places == 0){
+                $stmt->close();
+                return $result;
+            }
+            else{
+                $stmt->close();
+                return NULL;
+            }
+        }
+        else{
+            $stmt->close();
+            return NULL;
+        }
+    }
+
+    /**
+     * Get the number of places
+     * @return number of places
+     */
+    public function getNumberOfPlaces() {
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM places");
+        if ($stmt->execute()) {
+            $places = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+            return $places;
+        } else {
+            return NULL;
+        }
+    }
+
+    /**
+     * Get most visited places
+     * @return place list
+     */
+    public function getMostVisitedPlaces() {
+        $place_id = null; $name = null; $visited=null;
+
+        $stmt = $this->conn->prepare("SELECT places.place_id, places.name, COUNT(*) as visited FROM places
+                                      LEFT JOIN comments on comments.place_id = places.place_id
+                                      LEFT JOIN scores on scores.place_id = places.place_id
+                                      GROUP BY places.place_id
+                                      ORDER BY visited DESC
+                                      LIMIT 5");
+        if($stmt->execute()){
+            $stmt->bind_result($place_id, $name, $visited);
+
+            $result = array();
+            $num_places = 0;
+            while ($stmt->fetch()) {
+                $result[] = array(
+                    'place_id' => $place_id,
+                    'name' => $name,
+                    'visited' => $visited,
+                );
+                $num_places++;
+            }
+
+            if(!$num_places == 0){
+                $stmt->close();
+                return $result;
+            }
+            else{
+                $stmt->close();
+                return NULL;
+            }
+        }
+        else{
+            $stmt->close();
+            return NULL;
+        }
+    }
+
+
+    /**
+     * Get top rated places
+     * @return place list
+     */
+    public function getTopRatedPlaces() {
+        $place_id = null; $name = null; $score = null;
+
+        $stmt = $this->conn->prepare("SELECT t2.place_id, places.name, ((`total_score2`/ `num_scores`)/5) as `score` FROM
+                                    (SELECT place_id, COUNT(*) AS `num_scores`, SUM(`total_score1`) as `total_score2` FROM
+                                    (SELECT place_id, (paper+cleanliness+size+smell+wait_time) as `total_score1` FROM `scores`) t1
+                                    GROUP BY place_id) t2
+                                    LEFT JOIN places ON places.place_id = t2.place_id
+                                    ORDER BY `score` DESC LIMIT 5");
+        if($stmt->execute()){
+            $stmt->bind_result($place_id, $name, $score);
+
+            $result = array();
+            $num_places = 0;
+            while ($stmt->fetch()) {
+                $result[] = array(
+                    'place_id' => $place_id,
+                    'name' => $name,
+                    'score' => round($score * 2)/2,
+                );
+                $num_places++;
+            }
+
+            if(!$num_places == 0){
+                $stmt->close();
+                return $result;
+            }
+            else{
+                $stmt->close();
+                return NULL;
+            }
+        }
+        else{
+            $stmt->close();
+            return NULL;
+        }
+    }
+
     /* ------------- `scores` table method ------------------ */
 
     /**
@@ -88,7 +225,7 @@ class db_handler {
     /**
      * Get score by place ID
      * @param String $place_id place ID
-     * @return place
+     * @return score
      */
     public function getScoreByPlaceId($place_id) {
         $paper = null; $size = null; $wait_time = 0; $cleanliness = 0; $smell = 0;
@@ -186,7 +323,14 @@ class db_handler {
         $stmt->close();
         return $result;
     }
-
 }
+
+/*SELECT t2.place_id, places.name, ((`total_score2`/ `num_scores`)/5) as `score` FROM
+(SELECT place_id, COUNT(*) AS `num_scores`, SUM(`total_score1`) as `total_score2` FROM
+(SELECT place_id, (paper+cleanliness+size+smell+wait_time) as `total_score1` FROM `scores`) t1
+GROUP BY place_id) t2
+LEFT JOIN places ON places.place_id = t2.place_id
+ORDER BY `score` DESC LIMIT 5*/
+
 
 ?>

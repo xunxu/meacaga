@@ -97,7 +97,6 @@ $app->post('/place', function() use ($app) {
         $response["place_id"] = $result;
         echoResponse(200, $response);
     }
-
 });
 
 
@@ -230,6 +229,109 @@ $app->post('/comment', function() use ($app) {
         echoResponse(200, $response);
     }
 
+});
+
+
+/**
+ * Listing last added places
+ * url /lastAddedPlaces
+ * method GET
+ * Will return 404 if the are any place
+ */
+$app->get('/lastAddedPlaces', function() {
+    $response = array();
+    $db = new db_handler();
+
+    // fetch task
+    $result = $db->getLastAddedPlaces();
+
+    if ($result != NULL) {
+        $response["error"] = false;
+        $response["places"] = $result;
+
+        echoResponse(200, $response);
+    } else {
+        $response["error"] = true;
+        $response["message"] = "There are not recent places";
+        echoResponse(404, $response);
+    }
+});
+
+
+/**
+ * Get the total number of places
+ * url /numberOfPlaces
+ * method GET
+ * Will return 404 if the are not any place
+ */
+$app->get('/numberOfPlaces', function() {
+    $response = array();
+    $db = new db_handler();
+
+    // fetch task
+    $result = $db->getNumberOfPlaces();
+
+    if ($result != NULL) {
+        $response["error"] = false;
+        $response["number_of_places"] = $result["COUNT(*)"];
+        echoResponse(200, $response);
+    } else {
+        $response["error"] = true;
+        $response["message"] = "The are not any place";
+        echoResponse(404, $response);
+    }
+});
+
+
+/**
+ * Most visited places
+ * url /topVisitedPlaces
+ * method GET
+ * Will return 404 if the are any place
+ */
+$app->get('/topVisitedPlaces', function() {
+    $response = array();
+    $db = new db_handler();
+
+    // fetch task
+    $result = $db->getMostVisitedPlaces();
+
+    if ($result != NULL) {
+        $response["error"] = false;
+        $response["places"] = $result;
+
+        echoResponse(200, $response);
+    } else {
+        $response["error"] = true;
+        $response["message"] = "There are not recent places";
+        echoResponse(404, $response);
+    }
+});
+
+
+/**
+ * Top rated places
+ * url /topRatedPlaces
+ * method GET
+ * Will return 404 if the are any place
+ */
+$app->get('/topRatedPlaces', function() {
+    $response = array();
+    $db = new db_handler();
+
+    // fetch task
+    $result = $db->getTopRatedPlaces();
+
+    if ($result != NULL) {
+        $response["error"] = false;
+        $response["places"] = $result;
+
+        echoResponse(200, $response);
+    } else {
+        $response["error"] = true;
+        $response["message"] = "There are not any place";
+        echoResponse(404, $response);
+    }
 });
 
 
