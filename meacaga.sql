@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Tiempo de generación: 21-10-2015 a las 13:20:40
--- Versión del servidor: 10.0.17-MariaDB
--- Versión de PHP: 5.6.14
+-- Tiempo de generaciï¿½n: 21-10-2015 a las 13:20:40
+-- Versiï¿½n del servidor: 10.0.17-MariaDB
+-- Versiï¿½n de PHP: 5.6.14
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -92,7 +92,7 @@ CREATE TABLE `scores` (
 CREATE TABLE `photos` (
   `photo_id` int(11) NOT NULL AUTO_INCREMENT,
   `place_id` int(11) NOT NULL,
-  `path` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`photo_id`),
   INDEX (`place_id`),
   CONSTRAINT FOREIGN KEY (`place_id`) REFERENCES `places` (`place_id`) ON DELETE CASCADE ON UPDATE CASCADE

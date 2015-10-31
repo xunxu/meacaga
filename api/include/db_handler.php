@@ -272,7 +272,7 @@ class db_handler {
     /**
      * Get comments by place ID
      * @param String $place_id place ID
-     * @return place
+     * @return comments
      */
     public function getCommentsByPlaceId($place_id) {
         $comment = null; $date = null;
@@ -323,14 +323,63 @@ class db_handler {
         $stmt->close();
         return $result;
     }
+
+    /* ------------- `photos` table method ------------------ */
+
+    /**
+     * Add new photo
+     * @param $place_id
+     * @param $name
+     */
+    public function addPhoto($place_id, $name) {
+        // insert query
+        $stmt = $this->conn->prepare("INSERT INTO photos(place_id, name) values(?,?)");
+        $stmt->bind_param("ss", $place_id, $name);
+        $result = $stmt->execute();
+        if($result){
+            $result = $stmt->insert_id;
+        }
+        $stmt->close();
+        return $result;
+    }
+
+    /**
+     * Get photos by place ID
+     * @param String $place_id place ID
+     * @return photos
+     */
+    public function getPhotosByPlaceId($place_id) {
+        $name = null;
+
+        $stmt = $this->conn->prepare("SELECT name FROM photos WHERE place_id = ?");
+        $stmt->bind_param("s", $place_id);
+        if($stmt->execute()){
+            $stmt->bind_result($name);
+
+            $result = array();
+            $num_photos = 0;
+            while ($stmt->fetch()) {
+                $result[] = array(
+                    'photo' => $name,
+                );
+                $num_photos++;
+            }
+
+            if(!$num_photos == 0){
+                $stmt->close();
+                return $result;
+            }
+            else{
+                $stmt->close();
+                return NULL;
+            }
+        }
+        else{
+            $stmt->close();
+            return NULL;
+        }
+    }
+
 }
-
-/*SELECT t2.place_id, places.name, ((`total_score2`/ `num_scores`)/5) as `score` FROM
-(SELECT place_id, COUNT(*) AS `num_scores`, SUM(`total_score1`) as `total_score2` FROM
-(SELECT place_id, (paper+cleanliness+size+smell+wait_time) as `total_score1` FROM `scores`) t1
-GROUP BY place_id) t2
-LEFT JOIN places ON places.place_id = t2.place_id
-ORDER BY `score` DESC LIMIT 5*/
-
 
 ?>

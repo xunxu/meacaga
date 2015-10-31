@@ -339,57 +339,109 @@ $app->get('/topRatedPlaces', function() {
  * Photo upload
  * url - /photo
  * method - POST
- * params - file
+ * params - file, place_id
  * Return: id of the new photo added, or 400 if there are any error
  */
 $app->post('/photo', function() use ($app) {
 
-    $target_dir = "../../images/";
-    $imageFileType = pathinfo(basename($_FILES["fileToUpload"]["name"]),PATHINFO_EXTENSION);
-    $file_id =  md5(uniqid(rand(), true));
-    $target_file = $target_dir . $file_id . "." . $imageFileType;
+    verifyRequiredParams(array('place_id'));
 
-    $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
-    if($check !== false) {
-        // Check if file already exists
-        if (file_exists($target_file)) {
-            $response["error"] = true;
-            $response["message"] = "File already exists";
-            echoResponse(404, $response);
-        }
-        else{
-            // Check file size
-            if ($_FILES["fileToUpload"]["size"] > 500000) {
+    if(isset($_FILES["photo"])){
+        $target_dir = "../../images/";
+        $file_type = pathinfo(basename($_FILES["photo"]["name"]),PATHINFO_EXTENSION);
+        $file_id =  md5(uniqid(rand(), true));
+        $target_file = $target_dir . $file_id . "." . $file_type;
+
+        $check = getimagesize($_FILES["photo"]["tmp_name"]);
+        if($check !== false) {
+            // Check if file already exists
+            if (file_exists($target_file)) {
                 $response["error"] = true;
-                $response["message"] = "Your file is too large";
-                echoResponse(404, $response);
+                $response["message"] = "File already exists";
+                echoResponse(400, $response);
             }
             else{
-                // Allow certain file formats
-                if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif" ) {
+                // Check file size
+                if ($_FILES["photo"]["size"] > 10485760) {
                     $response["error"] = true;
-                    $response["message"] = "Only JPG, JPEG, PNG & GIF files are allowed";
-                    echoResponse(404, $response);
+                    $response["message"] = "Your file is too large. The maximum size is 10 MB";
+                    echoResponse(400, $response);
                 }
                 else{
-                    if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-                        $response["error"] = false;
-                        $response["file"] = $file_id . "." . $imageFileType;
-                        echoResponse(404, $response);
-                    } else {
+                    // Allow certain file formats
+                    if($file_type != "jpg" && $file_type != "png" && $file_type != "jpeg" && $file_type != "gif" ) {
                         $response["error"] = true;
-                        $response["message"] = "There was an error uploading your file";
-                        echoResponse(404, $response);
+                        $response["message"] = "Only JPG, JPEG, PNG & GIF files are allowed";
+                        echoResponse(400, $response);
+                    }
+                    else{
+                        if (move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file)) {
+                            $response = array();
+
+                            // reading post params
+                            $place_id = $app->request->post('place_id');
+
+                            $db = new db_handler();
+                            $result = $db->addPhoto($place_id, $file_id . "." . $file_type);
+
+                            if(!$result){
+                                $response["error"] = true;
+                                $response["message"] = "There was an error uploading your file";
+                                echoResponse(400, $response);
+                            }
+                            else{
+                                $response["error"] = false;
+                                $response["message"] = "Photo added successfully";
+                                $response["file"] = $file_id . "." . $file_type;
+                                echoResponse(200, $response);
+                            }
+                        } else {
+                            $response["error"] = true;
+                            $response["message"] = "There was an error uploading your file";
+                            echoResponse(400, $response);
+                        }
                     }
                 }
             }
+        } else {
+            $response["error"] = true;
+            $response["message"] = "File is not an image";
+            echoResponse(400, $response);
         }
+    }
+    else{
+        $response["error"] = true;
+        $response["message"] = "Required file photo is missing or empty";
+        echoResponse(400, $response);
+    }
+});
+
+
+/**
+ * Listing photos from a place
+ * url /photos/:place_id
+ * method GET
+ * Will return 404 if the are any photo
+ */
+$app->get('/photos/:place_id', function($place_id) {
+    $response = array();
+    $db = new db_handler();
+
+    // fetch task
+    $result = $db->getPhotosByPlaceId($place_id);
+
+    if ($result != NULL) {
+        $response["error"] = false;
+        $response["photos"] = $result;
+
+        echoResponse(200, $response);
     } else {
         $response["error"] = true;
-        $response["message"] = "File is not an image";
+        $response["message"] = "The requested place doesn't have any photo";
         echoResponse(404, $response);
     }
 });
+
 
 
 $app->run();
